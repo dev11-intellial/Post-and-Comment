@@ -15,27 +15,34 @@
 <body>
 
 
-
-    <a href="{% url 'post_listing' %}">All Post</a>
-
-
-
     <center>
         <div>
             <h2 style="background-color: #eee;">Intellial</h2>
         </div>
     </center>
-    <div class="small d-flex justify-content-center">
+    <center>
+        <div>
+            <h3 id="postbtn">POST</h3>
+        </div>
+        <form action="{% url 'compose_post'  %}" method="post">
+            {% csrf_token %}
+            <div style="display: none;" id="postform">
+                <div>
+                    <h2>Compose New Post</h2>
+                    <a href="#" id="cancel">cancel</a>
+                </div>
+                <div>
+                    <textarea name="message" placeholder="Write a post" cols="60" rows="5"></textarea>
+                </div>
 
+                <div class="small d-flex justify-content-center">
+                    <input type="submit" value="POST">
+                    <button type="button" class="btn btn-light" style="margin-left: 10px;">Cancel</button>
+                </div>
 
-        <h2 class="mb-0 mt-3">Feed</h2>
-
-
-
-        <button style="margin-left: 50px;margin-top: 20px;"><a href="#">Compose</a></button>
-
-
-    </div>
+            </div>
+        </form>
+    </center>
 
     <section style="background-color: #eee;">
         {% for i in post %}
@@ -48,7 +55,7 @@
                             <div class="d-flex flex-start align-items-center">
 
                                 <div>
-                                    <h2 class="fw-bold text-primary mb-1">{{i.user.name}}</h2>
+                                    <h2 class="fw-bold text-primary mb-1">{{i.user.username}}</h2>
                                     <p class="text-muted small mb-0">
                                         {{i.created}}
                                     </p>
@@ -65,10 +72,16 @@
                                 </a>
                                 <a href="#!" class="d-flex align-items-center me-3">
                                     <i class="far fa-comment-dots me-2"></i>
-                                    <p class="mb-0">Comment</p>
+                                    <p class="mb-0" class="combtn">Comment(0)</p>
                                 </a>
-
                             </div>
+                            <form action="" method="post">
+                                {% csrf_token %}
+                                <div class="div">
+                                    <input type="text" name="" class="comment" placeholder="write a comment...." ">
+                                    <button type=" submit">POST</button>
+                                </div>
+                            </form>
 
                         </div>
 
@@ -84,3 +97,15 @@
 </body>
 
 </html>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous">
+    </script>
+<script>
+    $('#postbtn').click(function () {
+        $('#postform').show();
+
+    });
+    $('#cancel').click(function () {
+        $('#postform').hide();
+    });
+</script>

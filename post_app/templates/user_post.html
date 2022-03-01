@@ -22,16 +22,30 @@
         </div>
     </center>
     <div class="small d-flex justify-content-center">
-
-
         <h2 class="mb-0 mt-3">Feed</h2>
-
-
-
-        <button style="margin-left: 50px;margin-top: 20px;" onclick="openForm()"><a href="#" id="">Compose</a></button>
-
-
+        <button style="margin-left: 50px;margin-top: 20px;" id="postbtn"><a href="#" id="">Compose</a></button>
     </div>
+    <center>
+        <form action="{% url 'compose_post'  %}" method="post">
+            {% csrf_token %}
+            <div style="display: none;" id="postform">
+                <div>
+                    <h2>Compose New Post</h2>
+                    <a href="#" id="cancel">cancel</a>
+                </div>
+                <div>
+                    <textarea name="message" placeholder="Write a post" cols="60" rows="5"></textarea>
+                </div>
+
+                <div class="small d-flex justify-content-center">
+                    <input type="submit" value="POST">
+                    <button type="button" class="btn btn-light" style="margin-left: 10px;">Cancel</button>
+                </div>
+
+            </div>
+        </form>
+    </center>
+
     <section style="background-color: #eee;">
         {% for i in post %}
         <div class="container my-5 py-5">
@@ -40,10 +54,12 @@
                     <div class="card">
                         <div class="card-body">
 
+
                             <div class="d-flex flex-start align-items-center">
 
                                 <div>
-                                    <h2 class="fw-bold text-primary mb-1">{{i.user.name}}</h2>
+                                    <h2 class="fw-bold text-primary mb-1 d-flex">{{i.user.name}}</h2>
+
                                     <p class="text-muted small mb-0">
                                         {{i.created}}
                                     </p>
@@ -55,13 +71,10 @@
                             </p>
 
                             <div class="small d-flex justify-content-start">
+
                                 <a href="#!" class="d-flex align-items-center me-3">
-                                    <i class="far fa-thumbs-up me-2"></i>
-                                    <p class="mb-0">Like-0</p>
-                                </a>
-                                <a href="#!" class="d-flex align-items-center me-3">
-                                    <i class="far fa-comment-dots me-2"></i>
-                                    <p class="mb-0">Comment</p>
+
+                                    <p class="mb-0"><a href="{% url 'post_delete' id=i.id %}">Delete</a></p>
                                 </a>
 
                             </div>
@@ -75,20 +88,19 @@
         {% endfor %}
     </section>
 
-    <div id="myForm">
-        <div>
-            <h2>Compose New Post</h2>
-        </div>
-        <div>
-            <textarea name="" placeholder="Write a post" cols="60" rows="5"></textarea>
-        </div>
-        <div class="small d-flex justify-content-start">
-            <button type="button" class="btn btn-primary">Post</button>
-            <button type="button" class="btn btn-light" style="margin-left: 10px;">Cancel</button>
-
-        </div>
-    </div>
 
 </body>
 
 </html>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous">
+    </script>
+<script>
+    $('#postbtn').click(function () {
+        $('#postform').show();
+
+    });
+    $('#cancel').click(function () {
+        $('#postform').hide();
+    });
+</script>
