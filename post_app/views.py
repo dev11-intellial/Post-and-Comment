@@ -1,7 +1,7 @@
 from django.shortcuts import render,HttpResponse,redirect
 from .models import *
 from django.contrib.auth.models import User
-
+from django.contrib.auth import logout 
 from django.contrib import auth
 # Create your views here.
 def index(request):
@@ -19,8 +19,14 @@ def register(request):
         return render(request,'index.html')
     else:
         return render(request,'register.html')
+
+
 def post_listing(request):
     post = Post.objects.all()
+    
+    
+    
+    
     return render(request,'post_listing.html',{'post':post})
 
 def login(request):
@@ -61,19 +67,57 @@ def compose_post(request):
     except:
         print(5)
         return HttpResponse('<h2>404 page not found</h2>')
-    
+
+def comment_on_post(request,id):
+    if request.method == 'POST':
+        current_user = request.user
+        print(current_user.id)
+        post = Post.objects.get(id=id)
+        print(post.id)
+        comment=Comment.objects.create(
+            user=current_user,
+            post=post,
+            comment=request.POST['comment']
+        )
+        
 
 
-def user_post(request):
-    post = Post.objects.all()
-    user = User.objects.filter(name=post)
-    return render(request,'user_post.html',{'post':user})
-
-def post_delete(request,id):
-    post = Post.objects.get(id=id)
-    post.delete()
+        
     return redirect('post_listing')
 
-def sucess(request):
-    return render(request,'sucess.html')
+#def show_comment(request):
+#    post =Post.objects.all()
+#    user =User.objects.filter(user_name=post)
+#    comment=Comment.objects.filter(comment=user)
+#
+#    return render(request,'sucess.html',{'comment':comment})
 
+def post_delete(request,id):
+    try:
+        user = request.user
+        post = Post.objects.get(id=id,user=user)
+        post.delete()
+        return redirect('post_listing')
+
+    except:
+        return redirect('post_listing')
+def like(request,id):
+    if request.method == 'POST':
+        user = request.user
+        post = Post.objects.get(id=id)
+
+        if Like.objects.filter(user=user, post=post).exists():
+            
+            return redirect('post_listing')
+
+        else:
+            newlike=Like(user=user,post=post)
+            
+            newlike.like += 1
+            newlike.save()
+    
+            return redirect('post_listing')
+
+def logout(request):
+    
+    return redirect('index')
