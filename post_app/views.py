@@ -22,11 +22,16 @@ def register(request):
 
 
 def post_listing(request):
+    # user = User.objects.all()
     post = Post.objects.all()
     
-    
-    
-    
+    #like = Like.objects.all()
+    #user = request.user
+    #comment= Comment.objects.filter(post=post)
+    # comment= Comment.objects.all()
+    # for i in comment:
+    #     print(i)
+    #     print(i.user)
     return render(request,'post_listing.html',{'post':post})
 
 def login(request):
@@ -115,9 +120,29 @@ def like(request,id):
             
             newlike.like += 1
             newlike.save()
-    
+            
             return redirect('post_listing')
 
 def logout(request):
     
     return redirect('index')
+
+
+def post_with_comment(request,id):
+    post = Post.objects.get(id=id)
+    
+    comment = Comment.objects.filter(post=post)
+    number_of_comment = comment.count()
+    return render(request,'comment_page.html',{'comment':comment,'post':post,'number_of_comment':number_of_comment})
+
+
+
+
+def delete_comment(request,id):
+    try:
+        user=request.user
+        comment= Comment.objects.get(id=id,user=user)
+        comment.delete()
+        return redirect('post_listing')
+    except:
+        return redirect('post_listing')

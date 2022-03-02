@@ -12,6 +12,9 @@ urlpatterns = [
     path('comment_on_post/<int:id>/',comment_on_post,name='comment_on_post'),
     path('like/<int:id>/',like,name='like'),
     path('logout/',logout,name='logout'),
+    path('post_with_comment/<int:id>/',post_with_comment,name='post_with_comment'),
+    path('delete_comment/<int:id>/',delete_comment,name='delete_comment'),
+    
 
     
 ]

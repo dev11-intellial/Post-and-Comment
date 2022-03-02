@@ -13,6 +13,9 @@
 
 
 <body>
+
+
+
     <div>
         <a href="{% url 'logout' %}">Log out</a>
 
@@ -47,6 +50,7 @@
         </form>
     </center>
 
+
     <section style="background-color: #eee;">
         {% for i in post %}
         <div class="container my-5 py-5">
@@ -65,17 +69,18 @@
                                 </div>
                                 {% if request.user %}
                                 <a href="{% url 'post_delete' id=i.id %}">X</a>
+                                {% else %}
+
                                 {% endif %}
+                                <a href="{% url 'post_with_comment' id=i.id %}" style="margin-left: 20px;">All comments
+                                </a>
                             </div>
 
                             <p class="mt-3 mb-4 pb-2">{{i.post_message}}
                             </p>
 
-
-
-                            {% if request.user.id not in post %}
-                            <button type='submit' name='like' value="{{ i.id }}"
-                                class="btn btn-primary">Dislike</button>
+                            {% if user in like.user %}
+                            <button>Dislike</button>
                             {% else %}
                             <div class="small d-flex justify-content-start">
                                 <form action="{% url 'like' id=i.id %}" method="post">
@@ -96,6 +101,11 @@
                                     <button type=" submit">POST</button>
                                 </div>
                             </form>
+
+                            <p>Comment</p>
+
+
+
 
                         </div>
 
