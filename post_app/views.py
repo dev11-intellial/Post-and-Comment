@@ -24,9 +24,11 @@ def register(request):
 
 
 def post_listing(request):
-    post = Post.objects.all()
+    post = Post.objects.all().order_by('-created')
+    comments = Comment.objects.values("comment","post_id","user__username","created").order_by('-created')
+    print(comments)
     like = Like.objects.all()
-    return render(request,'post_listing.html',{'post':post,'like':like})
+    return render(request,'post_listing.html',{'post':post,'like':like,'comments':comments})
 
 def login(request):
     if request.method == 'POST':
@@ -116,6 +118,6 @@ def delete_comment(request,id):
         user=request.user
         comment= Comment.objects.get(id=id,user=user)
         comment.delete()
-        return redirect('post_listing')
+        return redirect('post_with_comment')
     except:
         return redirect('post_listing')

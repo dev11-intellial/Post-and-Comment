@@ -11,16 +11,10 @@
 
 </head>
 
-
 <body>
-
-
-
     <div>
         <a href="{% url 'logout' %}">Log out</a>
-
     </div>
-
     <center>
         <div>
             <h2 style="background-color: #eee;">Intellial</h2>
@@ -45,12 +39,9 @@
                     <input type="submit" value="POST">
                     <button type="reset" class="btn btn-light" style="margin-left: 10px;">Cancel</button>
                 </div>
-
             </div>
         </form>
     </center>
-
-
     <section style="background-color: #eee;">
         {% for i in post %}
         <div class="container my-5 py-5">
@@ -58,28 +49,24 @@
                 <div class="col-md-12 col-lg-10 col-xl-8">
                     <div class="card">
                         <div class="card-body">
-
                             <div class="d-flex flex-start align-items-center">
-
                                 <div>
                                     <h2 class="fw-bold text-primary mb-1">{{i.user.username}}</h2>
                                     <p class="text-muted small mb-0">
                                         {{i.created}}
                                     </p>
                                 </div>
-                                {% if request.user %}
-                                <a href="{% url 'post_delete' id=i.id %}">X</a>
-                                {% else %}
-
-                                {% endif %}
                                 <a href="{% url 'post_with_comment' id=i.id %}" style="margin-left: 20px;">All comments
                                 </a>
-                            </div>
+                                {% if request.user == i.user %}
+                                <a href="{% url 'post_delete' id=i.id %}" style="margin-left: 500px;">X</a>
 
+                                {% endif %}
+                            </div>
                             <p class="mt-3 mb-4 pb-2">{{i.post_message}}
                             </p>
 
-                            {% if user in like.user %}
+                            {% if request.user == like %}
                             <button>Dislike</button>
                             {% else %}
                             <div class="small d-flex justify-content-start">
@@ -88,11 +75,9 @@
                                     <button type='submit' name='like' value="{{ i.id }}"
                                         class="btn btn-primary">like</button>
                                 </form>
-
-
-
                             </div>
                             {% endif %}
+
                             <form action="{% url 'comment_on_post' id=i.id %}" method="post">
                                 {% csrf_token %}
                                 <div class="div">
@@ -101,23 +86,34 @@
                                     <button type=" submit">POST</button>
                                 </div>
                             </form>
+                            <p class="comment">Comment</p>
 
-                            <p>Comment</p>
+                            {% for comment in comments %}
+                            {% if comment.post_id == i.id %}
+                            <div style="border: 2px solid black;display: none;" class="allcom">
+                                <div>
+
+                                    <h4 class="fw-bold text-primary mb-0">{{comment.user__username}}</h4>
+                                    <p class="text-muted small mb-0">{{comment.created}}</p>
+                                </div>
+                                <p class="mt-3 mb-0 pb-2">{{comment.comment}}
+                                </p>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
 
 
 
 
                         </div>
-
                     </div>
                 </div>
             </div>
-
         </div>
+
         {% endfor %}
+
     </section>
-
-
 </body>
 
 </html>
@@ -125,7 +121,6 @@
     integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous">
     </script>
 <script>
-
     $(document).ready(function () {
         $('#postbtn').click(function () {
             $('#postform').show();
@@ -134,15 +129,9 @@
         $('#cancel').click(function () {
             $('#postform').hide();
         });
-
-
+        $('.comment').click(function () {
+            $('.allcom').show();
+        });
 
     });
-
-
-
-
-
-
-
 </script>

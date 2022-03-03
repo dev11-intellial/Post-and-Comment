@@ -73,33 +73,22 @@
                 <div class="col-md-12 col-lg-10 col-xl-8">
                     <div class="card">
                         <div class="card-body">
-
-
-
-
-
-
                             <div class="small d-flex justify-content-start">
-
                                 <a href="#!" class="d-flex align-items-center me-3">
-
-
                                 </a>
-
                             </div>
                             <div style="border: 2px solid black;">
-
                                 <h2 class="fw-bold text-primary mb-1">{{i.user}}</h2>
-
-                                <p class="text-muted small mb-0"><a href="{% url 'delete_comment' id=i.id %}">Delete</a>
-
+                                {% if request.user == i.user %}
+                                <p class="text-muted small mb-0 " style="margin-left: 700px;"><a
+                                        href="{% url 'delete_comment' id=i.id %}">X</a>
                                 </p>
+                                {% else %}
+                                {% endif %}
                                 <p>{{i.created}}</p>
                                 <p>{{i.comment}}</p>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
             </div>
