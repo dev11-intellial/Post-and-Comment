@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout 
 from django.contrib import auth
 # Create your views here.
+
+
 def index(request):
     return render(request,'index.html')
 
@@ -22,20 +24,11 @@ def register(request):
 
 
 def post_listing(request):
-    # user = User.objects.all()
     post = Post.objects.all()
-    
-    #like = Like.objects.all()
-    #user = request.user
-    #comment= Comment.objects.filter(post=post)
-    # comment= Comment.objects.all()
-    # for i in comment:
-    #     print(i)
-    #     print(i.user)
-    return render(request,'post_listing.html',{'post':post})
+    like = Like.objects.all()
+    return render(request,'post_listing.html',{'post':post,'like':like})
 
 def login(request):
-    
     if request.method == 'POST':
             user_name = request.POST['username']
             password = request.POST['password']
@@ -45,23 +38,17 @@ def login(request):
                 auth.login(request,user)
                 print(5)
                 return redirect('post_listing')
-
             else:
                 msg = 'please enter a correct username and password'
                 return render(request,'index.html',{'msg':msg})
-
     else:
         return render(request,'index.html')
-        #else:
-            #msg = 'please enter a correct username and password'
-            #return render(request,'index.html')
+        
    
 def compose_post(request):
     try:
         if request.method == 'POST':
             current_user = request.user
-            #print( current_user.id)
-            
             post_message = Post.objects.create(
                 user=current_user,
                 post_message = request.POST['message']
@@ -83,19 +70,8 @@ def comment_on_post(request,id):
             user=current_user,
             post=post,
             comment=request.POST['comment']
-        )
-        
-
-
-        
+        )    
     return redirect('post_listing')
-
-#def show_comment(request):
-#    post =Post.objects.all()
-#    user =User.objects.filter(user_name=post)
-#    comment=Comment.objects.filter(comment=user)
-#
-#    return render(request,'sucess.html',{'comment':comment})
 
 def post_delete(request,id):
     try:
@@ -106,34 +82,31 @@ def post_delete(request,id):
 
     except:
         return redirect('post_listing')
+
 def like(request,id):
     if request.method == 'POST':
         user = request.user
         post = Post.objects.get(id=id)
-
         if Like.objects.filter(user=user, post=post).exists():
-            
             return redirect('post_listing')
-
         else:
             newlike=Like(user=user,post=post)
-            
             newlike.like += 1
             newlike.save()
             
             return redirect('post_listing')
 
 def logout(request):
-    
     return redirect('index')
 
 
 def post_with_comment(request,id):
-    post = Post.objects.get(id=id)
-    
+    post = Post.objects.get(id=id) 
     comment = Comment.objects.filter(post=post)
     number_of_comment = comment.count()
-    return render(request,'comment_page.html',{'comment':comment,'post':post,'number_of_comment':number_of_comment})
+    like = Like.objects.filter(post=post)
+    number_of_like =like.count()
+    return render(request,'comment_page.html',{'comment':comment,'post':post,'number_of_comment':number_of_comment,'number_of_like':number_of_like})
 
 
 
