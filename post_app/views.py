@@ -24,11 +24,11 @@ def register(request):
 
 
 def post_listing(request):
-    post = Post.objects.all().order_by('-created')
+    post = Post.objects.values("id","user__username","post_message","created").order_by('-created')
     comments = Comment.objects.values("comment","post_id","user__username","created").order_by('-created')
-    print(comments)
-    like = Like.objects.all()
-    return render(request,'post_listing.html',{'post':post,'like':like,'comments':comments})
+    like = Like.objects.values("id","user__username","post","like")
+    #like = Like.objects.filter(post=post.post_message)
+    return render(request,'post_listing.html',{'post':post,'likes':like,'comments':comments})
 
 def login(request):
     if request.method == 'POST':
@@ -90,6 +90,7 @@ def like(request,id):
         user = request.user
         post = Post.objects.get(id=id)
         if Like.objects.filter(user=user, post=post).exists():
+    
             return redirect('post_listing')
         else:
             newlike=Like(user=user,post=post)
@@ -104,7 +105,7 @@ def logout(request):
 
 def post_with_comment(request,id):
     post = Post.objects.get(id=id) 
-    comment = Comment.objects.filter(post=post)
+    comment = Comment.objects.filter(post=post).order_by("-created")
     number_of_comment = comment.count()
     like = Like.objects.filter(post=post)
     number_of_like =like.count()
@@ -121,3 +122,5 @@ def delete_comment(request,id):
         return redirect('post_with_comment')
     except:
         return redirect('post_listing')
+
+

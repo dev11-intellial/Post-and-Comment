@@ -51,14 +51,14 @@
                         <div class="card-body">
                             <div class="d-flex flex-start align-items-center">
                                 <div>
-                                    <h2 class="fw-bold text-primary mb-1">{{i.user.username}}</h2>
+                                    <h2 class="fw-bold text-primary mb-1">{{i.user__username}}</h2>
                                     <p class="text-muted small mb-0">
                                         {{i.created}}
                                     </p>
                                 </div>
                                 <a href="{% url 'post_with_comment' id=i.id %}" style="margin-left: 20px;">All comments
                                 </a>
-                                {% if request.user == i.user %}
+                                {% if request.user.username == i.user__username %}
                                 <a href="{% url 'post_delete' id=i.id %}" style="margin-left: 500px;">X</a>
 
                                 {% endif %}
@@ -66,17 +66,19 @@
                             <p class="mt-3 mb-4 pb-2">{{i.post_message}}
                             </p>
 
-                            {% if request.user == like %}
-                            <button>Dislike</button>
-                            {% else %}
                             <div class="small d-flex justify-content-start">
                                 <form action="{% url 'like' id=i.id %}" method="post">
                                     {% csrf_token %}
-                                    <button type='submit' name='like' value="{{ i.id }}"
+                                    <button type='submit' name='like' value="{{ i.id }}" id="like"
                                         class="btn btn-primary">like</button>
                                 </form>
                             </div>
+                            {% for like in likes %}
+                            {% if like.post == i.id %}
+
+                            <p class="total">{{like.like}}</p>
                             {% endif %}
+                            {% endfor %}
 
                             <form action="{% url 'comment_on_post' id=i.id %}" method="post">
                                 {% csrf_token %}
@@ -86,22 +88,28 @@
                                     <button type=" submit">POST</button>
                                 </div>
                             </form>
-                            <p class="comment">Comment</p>
+                            <div class="main">
+                                <p class="comment">Comment</p>
 
-                            {% for comment in comments %}
-                            {% if comment.post_id == i.id %}
-                            <div style="border: 2px solid black;display: none;" class="allcom">
-                                <div>
+                                {% for comment in comments %}
+                                {% if comment.post_id == i.id %}
+                                <div style="border: 2px solid black;display: none;" class="allcom">
+                                    <div>
 
-                                    <h4 class="fw-bold text-primary mb-0">{{comment.user__username}}</h4>
-                                    <p class="text-muted small mb-0">{{comment.created}}</p>
+                                        <h4 class="fw-bold text-primary mb-0">{{comment.user__username}}</h4>
+                                        {% if request.user.username == comment.user__username %}
+                                        <p>{{comment.id}}</p>
+                                        <a href="#" style="margin-left: 500px;" value="{{comment.id}}">X</a>
+
+                                        {% endif %}
+                                        <p class="text-muted small mb-0">{{comment.created}}</p>
+                                    </div>
+                                    <p class="mt-3 mb-0 pb-2">{{comment.comment}}
+                                    </p>
                                 </div>
-                                <p class="mt-3 mb-0 pb-2">{{comment.comment}}
-                                </p>
+                                {% endif %}
+                                {% endfor %}
                             </div>
-                            {% endif %}
-                            {% endfor %}
-
 
 
 
@@ -130,7 +138,8 @@
             $('#postform').hide();
         });
         $('.comment').click(function () {
-            $('.allcom').show();
+            $('.allcom').hide();
+            $(this).parent('.main').find('.allcom').show();
         });
 
     });
