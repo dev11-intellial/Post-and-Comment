@@ -1,8 +1,10 @@
-from django.shortcuts import render,HttpResponse,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from .models import *
 from django.contrib.auth.models import User
 from django.contrib.auth import logout 
 from django.contrib import auth
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 # Create your views here.
 
 
@@ -25,10 +27,16 @@ def register(request):
 
 def post_listing(request):
     post = Post.objects.values("id","user__username","post_message","created").order_by('-created')
+    
     comments = Comment.objects.values("comment","post_id","user__username","created").order_by('-created')
-    like = Like.objects.values("id","user__username","post","like")
+    like=Like.objects.values('like','post_id','user__username','id')
+    
+    
+    #like = Like.objects.values("id","user__username","post","like")
     #like = Like.objects.filter(post=post.post_message)
-    return render(request,'post_listing.html',{'post':post,'likes':like,'comments':comments})
+  
+    
+    return render(request,'post_listing.html',{'post':post,'comments':comments,'like':like})
 
 def login(request):
     if request.method == 'POST':
@@ -99,6 +107,41 @@ def like(request,id):
             
             return redirect('post_listing')
 
+def dislike(request,id):
+    if request.method == 'POST':
+        user = request.user
+        post = Post.objects.get(id=id)
+        print(1)
+        if Dislike.objects.filter(user=user, post=post).exists():
+           
+            #decrease_like=Like(user=user,post=post)
+            #print(3)
+            #decrease_like.like -= 1
+            #print(4)
+            #decrease_like.save()
+            #dislike = Dislike(user=user,post=post)
+            #print(5)
+            #dislike.dislike += 1
+            #dislike.save()
+            return redirect('post_listing')
+        else:
+            print(2)
+            dislike = Dislike(user=user,post=post)
+            dislike.dislike += 1
+            dislike.save()
+            like = Like(user=user,post=post,id=id)
+            like.delete()
+            print(3)
+            
+
+            
+            print(4)
+            return redirect('post_listing')
+
+   
+   
+
+
 def logout(request):
     return redirect('index')
 
@@ -109,7 +152,9 @@ def post_with_comment(request,id):
     number_of_comment = comment.count()
     like = Like.objects.filter(post=post)
     number_of_like =like.count()
-    return render(request,'comment_page.html',{'comment':comment,'post':post,'number_of_comment':number_of_comment,'number_of_like':number_of_like})
+    dislike = Dislike.objects.filter(post=post)
+    number_of_dislike = dislike.count()
+    return render(request,'comment_page.html',{'comment':comment,'post':post,'number_of_comment':number_of_comment,"number_of_like":number_of_like,"number_of_dislike":number_of_dislike})
 
 
 

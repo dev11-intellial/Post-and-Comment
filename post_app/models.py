@@ -26,5 +26,8 @@ class Like(models.Model):
     like = models.IntegerField(default=0)
 
     
-   
+class Dislike(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    post = models.ForeignKey(Post,on_delete=models.CASCADE)
+    dislike = models.IntegerField(default=0)
     
