@@ -28,15 +28,36 @@ def register(request):
 def post_listing(request):
     post = Post.objects.values("id","user__username","post_message","created").order_by('-created')
     
-    comments = Comment.objects.values("comment","post_id","user__username","created").order_by('-created')
-    like=Like.objects.values('like','post_id','user__username','id')
+    comments = Comment.objects.values("comment","post_id","user__username","created",'id').order_by('-created')
+    #like=Like.objects.values('like','post_id','user__username','id')
+    comment= []
+    for i in post :
+        comment_count=Comment.objects.filter(post__id=i['id']).count()
+        data={
+            'post':i['id'],
+            'comment_count':comment_count
+            }
+        comment.append(data)
+    like= []
+    for i in post :
+        like_count=Like.objects.filter(post__id=i['id']).count()
+        data={
+            'post':i['id'],
+            'like_count':like_count
+            }
+        like.append(data)
+
+    dislike = []
+    for i in post :
+        dislike_count=Dislike.objects.filter(post__id=i['id']).count()
+        data={
+            'post':i['id'],
+            'dislike_count':dislike_count
+        }
+        dislike.append(data)
     
     
-    #like = Like.objects.values("id","user__username","post","like")
-    #like = Like.objects.filter(post=post.post_message)
-  
-    
-    return render(request,'post_listing.html',{'post':post,'comments':comments,'like':like})
+    return render(request,'post_listing.html',{'post':post,'comment':comment,'like':like,'dislike':dislike,'comments':comments})
 
 def login(request):
     if request.method == 'POST':
@@ -138,33 +159,16 @@ def dislike(request,id):
             print(4)
             return redirect('post_listing')
 
-   
-   
-
 
 def logout(request):
     return redirect('index')
-
-
-def post_with_comment(request,id):
-    post = Post.objects.get(id=id) 
-    comment = Comment.objects.filter(post=post).order_by("-created")
-    number_of_comment = comment.count()
-    like = Like.objects.filter(post=post)
-    number_of_like =like.count()
-    dislike = Dislike.objects.filter(post=post)
-    number_of_dislike = dislike.count()
-    return render(request,'comment_page.html',{'comment':comment,'post':post,'number_of_comment':number_of_comment,"number_of_like":number_of_like,"number_of_dislike":number_of_dislike})
-
-
-
 
 def delete_comment(request,id):
     try:
         user=request.user
         comment= Comment.objects.get(id=id,user=user)
         comment.delete()
-        return redirect('post_with_comment')
+        return redirect('post_listing')
     except:
         return redirect('post_listing')
 
