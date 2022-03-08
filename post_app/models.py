@@ -7,7 +7,7 @@ class Post(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     post_message = models.TextField(max_length=100)
     created = models.DateTimeField(auto_now_add=True)
-
+    
     def __str__(self):
         return self.post_message
 

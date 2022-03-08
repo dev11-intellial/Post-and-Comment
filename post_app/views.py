@@ -3,8 +3,8 @@ from .models import *
 from django.contrib.auth.models import User
 from django.contrib.auth import logout 
 from django.contrib import auth
-from django.http import HttpResponseRedirect
-from django.urls import reverse
+from django.db.models import Count
+
 # Create your views here.
 
 
@@ -20,44 +20,23 @@ def register(request):
         email=request.POST['email']
         password=request.POST['password']
         User.objects.create_user(username=user_name,first_name=first_name,last_name=last_name,email=email,password=password)
-        return render(request,'index.html')
+        return redirect('index')
     else:
         return render(request,'register.html')
 
 
-def post_listing(request):
+def posts(request):
     post = Post.objects.values("id","user__username","post_message","created").order_by('-created')
+    #post = Post.objects.values("id").order_by('-created')
     
     comments = Comment.objects.values("comment","post_id","user__username","created",'id').order_by('-created')
     #like=Like.objects.values('like','post_id','user__username','id')
-    comment= []
-    for i in post :
-        comment_count=Comment.objects.filter(post__id=i['id']).count()
-        data={
-            'post':i['id'],
-            'comment_count':comment_count
-            }
-        comment.append(data)
-    like= []
-    for i in post :
-        like_count=Like.objects.filter(post__id=i['id']).count()
-        data={
-            'post':i['id'],
-            'like_count':like_count
-            }
-        like.append(data)
-
-    dislike = []
-    for i in post :
-        dislike_count=Dislike.objects.filter(post__id=i['id']).count()
-        data={
-            'post':i['id'],
-            'dislike_count':dislike_count
-        }
-        dislike.append(data)
-    
-    
-    return render(request,'post_listing.html',{'post':post,'comment':comment,'like':like,'dislike':dislike,'comments':comments})
+    #comments=Comment.objects.filter(post=post)
+    like_count = (Like.objects.values("post_id").annotate(like_count=Count('like')))
+    dislike_count = (Dislike.objects.values('post_id').annotate(dislike_count=Count('dislike')))
+    print(dislike_count.query)
+    comment_count = (Comment.objects.values('post_id').annotate(comment_count=Count('comment')))
+    return render(request,'post_listing.html',{'post':post,'comments':comments,'like_count':like_count,'dislike_count':dislike_count,'comment_count':comment_count})
 
 def login(request):
     if request.method == 'POST':
@@ -68,7 +47,7 @@ def login(request):
                 print(3)
                 auth.login(request,user)
                 print(5)
-                return redirect('post_listing')
+                return redirect('posts')
             else:
                 msg = 'please enter a correct username and password'
                 return render(request,'index.html',{'msg':msg})
@@ -77,21 +56,19 @@ def login(request):
         
    
 def compose_post(request):
-    try:
-        if request.method == 'POST':
-            current_user = request.user
-            post_message = Post.objects.create(
-                user=current_user,
-                post_message = request.POST['message']
-            )
-            print(3)
-            return redirect('post_listing')
-            print(4)
-    except:
-        print(5)
-        return HttpResponse('<h2>404 page not found</h2>')
+    
+    if request.method == 'POST':
+        current_user = request.user
+        post_message = Post.objects.create(
+            user=current_user,
+            post_message = request.POST['message']
+        )
+        print(3)
+        return redirect('posts')
+    
+    
 
-def comment_on_post(request,id):
+def comments(request,id):
     if request.method == 'POST':
         current_user = request.user
         print(current_user.id)
@@ -102,17 +79,15 @@ def comment_on_post(request,id):
             post=post,
             comment=request.POST['comment']
         )    
-    return redirect('post_listing')
+    return redirect('posts')
 
 def post_delete(request,id):
-    try:
-        user = request.user
-        post = Post.objects.get(id=id,user=user)
-        post.delete()
-        return redirect('post_listing')
+    user = request.user 
+    post = Post.objects.get(id=id)
+    post.delete()
+    return redirect('posts')
 
-    except:
-        return redirect('post_listing')
+    
 
 def like(request,id):
     if request.method == 'POST':
@@ -120,13 +95,13 @@ def like(request,id):
         post = Post.objects.get(id=id)
         if Like.objects.filter(user=user, post=post).exists():
     
-            return redirect('post_listing')
+            return redirect('posts')
         else:
             newlike=Like(user=user,post=post)
             newlike.like += 1
             newlike.save()
             
-            return redirect('post_listing')
+            return redirect('posts')
 
 def dislike(request,id):
     if request.method == 'POST':
@@ -135,41 +110,23 @@ def dislike(request,id):
         print(1)
         if Dislike.objects.filter(user=user, post=post).exists():
            
-            #decrease_like=Like(user=user,post=post)
-            #print(3)
-            #decrease_like.like -= 1
-            #print(4)
-            #decrease_like.save()
-            #dislike = Dislike(user=user,post=post)
-            #print(5)
-            #dislike.dislike += 1
-            #dislike.save()
-            return redirect('post_listing')
+            return redirect('posts')
         else:
             print(2)
+            
             dislike = Dislike(user=user,post=post)
             dislike.dislike += 1
             dislike.save()
-            like = Like(user=user,post=post,id=id)
-            like.delete()
-            print(3)
-            
-
-            
-            print(4)
-            return redirect('post_listing')
+            return redirect('posts')
 
 
 def logout(request):
     return redirect('index')
 
 def delete_comment(request,id):
-    try:
-        user=request.user
-        comment= Comment.objects.get(id=id,user=user)
-        comment.delete()
-        return redirect('post_listing')
-    except:
-        return redirect('post_listing')
-
+    user=request.user    
+    comment= Comment.objects.get(id=id)    
+    comment.delete()    
+    return redirect('posts')
+    
 
