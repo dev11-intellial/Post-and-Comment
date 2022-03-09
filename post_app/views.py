@@ -31,14 +31,42 @@ def posts(request):
     post = Post.objects.values("id","user__username","post_message","created").order_by('-created')
     comments = Comment.objects.values("comment","post_id","user__username","created",'id').order_by('-created')
    
-    #like_count = (Like.objects.values("post_id").annotate(like_count=Count('like')))
-    #dislike_count = (Dislike.objects.values('post_id').annotate(dislike_count=Count('dislike')))
+    likes = Like.objects.values("post_id","like")
+    # dislike_count = (Dislike.objects.values('post_id').annotate(dislike_count=Count('dislike')))
+    
+    like_d = {}
+    dislike = {}
+
+    for like in likes:
+        print(like['like'])
+        if like['like'] is True:
+            print("KKKKKKKKKKKKKK",like['like'],like['post_id'])
+            if like["post_id"] in like_d:
+                print("LLLLLLLLLLLL")
+                # like_d[like["post_id"]] = 0
+                like_d[like["post_id"]] += 1  
+                
+            else:
+                like_d[like["post_id"]] = 1
+        else:
+            
+            if like["post_id"] in dislike:
+                print()
+                # dislike[like["post_id"]] = 0
+                dislike[like["post_id"]] += 1  
+                
+            else:
+                dislike[like["post_id"]] = 1
+                
+
+    print(like_d,"like_d",dislike)
+        
     
     comment_count = (Comment.objects.values('post_id').annotate(comment_count=Count('comment')))
     likes_count = (Post.objects.values('id').annotate(likes_count=Count('likes')))
     
     
-    return render(request,'posts.html',{'post':post,'comments':comments,'comment_count':comment_count,'likes_count':likes_count})
+    return render(request,'posts.html',{'post':post,'comments':comments,'comment_count':comment_count,'dislikes_count':dislike,'likes_count':like_d})
 
 def login(request):
     if request.method == 'POST':
@@ -125,15 +153,30 @@ def delete_comment(request,id):
 def logout(request):
     return redirect('index')
 
-def like_post(request,id):
-    post = get_object_or_404(Post,id=request.POST['post_id'])
+def like_post(request,like,id):
+    print(like)
+
+    is_like= True if like == "like" else False
+    print(2)
+
+    if not Like.objects.filter(user_id=request.user.id,post_id=id,like=is_like).exists():
+        print(3)
     
-    if post.likes.filter(id=request.user.id).exists():
-        post.likes.remove(request.user)
-        
-    else:
-        post.likes.add(request.user)
-        
-        
+        if like == "like":
+            Like.objects.create(user_id=request.user.id,post_id=id,like=True)
+        if like == "dislike":
+            Like.objects.create(user_id=request.user.id,post_id=id,like=False)
+        return redirect('posts')
+    
     return redirect('posts')
+    # post = get_object_or_404(Post,id=request.POST['post_id'])
+    
+    # if post.likes.filter(id=request.user.id).exists():
+    #     post.likes.remove(request.user)
+        
+    # else:
+    #     post.likes.add(request.user)
+        
+        
+    # return redirect('posts')
 
