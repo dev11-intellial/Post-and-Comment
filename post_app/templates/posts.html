@@ -65,7 +65,7 @@
                             <p class="mt-3 mb-4 pb-2">{{i.post_message}}
                             </p>
                             <div class="small d-flex justify-content-start">
-                                <form action="{% url 'like' id=i.id %}" method="post">
+                                <!-- <form action="{% url 'like' id=i.id %}" method="post">
                                     {% csrf_token %}
 
                                     <button type='submit' name='post_id' value="{{ i.id }}" id="like"
@@ -80,8 +80,8 @@
                                     </button>
 
 
-                                </form>
-                                <form action="{% url 'dislike' id=i.id %}" method="post">
+                                </form> -->
+                                <!-- <form action="{% url 'dislike' id=i.id %}" method="post">
                                     {% csrf_token %}
                                     <button type='submit' name='post_id' value="{{ i.id }}" id="like"
                                         class="btn btn-danger">Dislike
@@ -93,8 +93,23 @@
                                     </button>
 
 
-                                </form>
+                                </form> -->
                             </div>
+                            <form action="{% url 'like_post' id=i.id %}" method="post">
+                                {% csrf_token %}
+
+                                <button type='submit' name='post_id' value="{{ i.id }}" id="like"
+                                    class="btn btn-primary">
+                                    Like
+                                    {% for like in likes_count %}
+                                    {% if like.id == i.id %}
+                                    {{like.likes_count}}
+                                    {% endif %}
+                                    {% endfor %}
+                                </button>
+
+
+                            </form>
                             <form action="{% url 'comments' id=i.id %}" method="post">
                                 {% csrf_token %}
                                 <div class="div">
@@ -107,7 +122,7 @@
                                 <p class="comment">Comment
                                     {% for comment in comment_count %}
                                     {% if comment.post_id == i.id %}
-                                    ({{k.comment_count}})
+                                    ({{comment.comment_count}})
                                     {% endif %}
                                     {% endfor %}
                                 </p>

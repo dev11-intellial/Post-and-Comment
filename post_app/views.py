@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout 
 from django.contrib import auth
 from django.db.models import Count
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 # Create your views here.
 
@@ -27,16 +29,16 @@ def register(request):
 
 def posts(request):
     post = Post.objects.values("id","user__username","post_message","created").order_by('-created')
-    #post = Post.objects.values("id").order_by('-created')
-    
     comments = Comment.objects.values("comment","post_id","user__username","created",'id').order_by('-created')
-    #like=Like.objects.values('like','post_id','user__username','id')
-    #comments=Comment.objects.filter(post=post)
-    like_count = (Like.objects.values("post_id").annotate(like_count=Count('like')))
-    dislike_count = (Dislike.objects.values('post_id').annotate(dislike_count=Count('dislike')))
-    print(dislike_count.query)
+   
+    #like_count = (Like.objects.values("post_id").annotate(like_count=Count('like')))
+    #dislike_count = (Dislike.objects.values('post_id').annotate(dislike_count=Count('dislike')))
+    
     comment_count = (Comment.objects.values('post_id').annotate(comment_count=Count('comment')))
-    return render(request,'post_listing.html',{'post':post,'comments':comments,'like_count':like_count,'dislike_count':dislike_count,'comment_count':comment_count})
+    likes_count = (Post.objects.values('id').annotate(likes_count=Count('likes')))
+    
+    
+    return render(request,'posts.html',{'post':post,'comments':comments,'comment_count':comment_count,'likes_count':likes_count})
 
 def login(request):
     if request.method == 'POST':
@@ -52,11 +54,10 @@ def login(request):
                 msg = 'please enter a correct username and password'
                 return render(request,'index.html',{'msg':msg})
     else:
-        return render(request,'index.html')
+        return redirect('index')
         
    
 def compose_post(request):
-    
     if request.method == 'POST':
         current_user = request.user
         post_message = Post.objects.create(
@@ -86,21 +87,17 @@ def post_delete(request,id):
     post = Post.objects.get(id=id)
     post.delete()
     return redirect('posts')
-
-    
-
+   
 def like(request,id):
     if request.method == 'POST':
         user = request.user
         post = Post.objects.get(id=id)
         if Like.objects.filter(user=user, post=post).exists():
-    
             return redirect('posts')
         else:
             newlike=Like(user=user,post=post)
             newlike.like += 1
             newlike.save()
-            
             return redirect('posts')
 
 def dislike(request,id):
@@ -119,14 +116,24 @@ def dislike(request,id):
             dislike.save()
             return redirect('posts')
 
-
-def logout(request):
-    return redirect('index')
-
 def delete_comment(request,id):
     user=request.user    
     comment= Comment.objects.get(id=id)    
     comment.delete()    
     return redirect('posts')
     
+def logout(request):
+    return redirect('index')
+
+def like_post(request,id):
+    post = get_object_or_404(Post,id=request.POST['post_id'])
+    
+    if post.likes.filter(id=request.user.id).exists():
+        post.likes.remove(request.user)
+        
+    else:
+        post.likes.add(request.user)
+        
+        
+    return redirect('posts')
 
