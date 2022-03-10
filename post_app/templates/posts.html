@@ -94,40 +94,42 @@
 
 
                                 </form> -->
+
+                                <form action="/like_post/like/{{i.id}}/" method="post">
+                                    {% csrf_token %}
+
+                                    <button type='submit' name='post_id' value="{{ i.id }}" id="like"
+                                        class="btn btn-primary">
+                                        Like
+
+
+
+                                        {% for key,value in likes_count.items %}
+                                        {% if i.id == key %}
+                                        {{value}}
+                                        {% endif %}
+                                        {% endfor %}
+                                    </button>
+
+
+                                </form>
+
+                                <form action="/like_post/dislike/{{i.id}}/" method="post">
+                                    {% csrf_token %}
+
+                                    <button type='submit' name='post_id' value="{{ i.id }}" id="like"
+                                        class="btn btn-danger">
+                                        Dislike
+                                        {% for key , value in dislikes_count.items %}
+                                        {% if key == i.id %}
+                                        {{value}}
+                                        {% endif %}
+                                        {% endfor %}
+                                    </button>
+
+
+                                </form>
                             </div>
-                            <form action="/like_post/like/{{i.id}}/" method="post">
-                                {% csrf_token %}
-
-                                <button type='submit' name='post_id' value="{{ i.id }}" id="like"
-                                    class="btn btn-primary">
-                                    Like
-
-
-
-                                    {% for key,value in likes_count.items %}
-                                    {% if i.id == key %}
-                                    {{value}}
-                                    {% endif %}
-                                    {% endfor %}
-                                </button>
-
-
-                            </form>
-                            <form action="/like_post/dislike/{{i.id}}/" method="post">
-                                {% csrf_token %}
-
-                                <button type='submit' name='post_id' value="{{ i.id }}" id="like"
-                                    class="btn btn-danger">
-                                    Dislike
-                                    {% for key , value in dislikes_count.items %}
-                                    {% if key == i.id %}
-                                    {{value}}
-                                    {% endif %}
-                                    {% endfor %}
-                                </button>
-
-
-                            </form>
                             <form action="{% url 'comments' id=i.id %}" method="post">
                                 {% csrf_token %}
                                 <div class="div">
@@ -183,6 +185,7 @@
         {% endfor %}
 
     </section>
+
 </body>
 
 </html>

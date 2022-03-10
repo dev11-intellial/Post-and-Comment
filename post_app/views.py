@@ -38,20 +38,21 @@ def posts(request):
     dislike = {}
 
     for like in likes:
-        print(like['like'])
+        # print(like['like'])
         if like['like'] is True:
-            print("KKKKKKKKKKKKKK",like['like'],like['post_id'])
-            if like["post_id"] in like_d:
-                print("LLLLLLLLLLLL")
+            # print("KKKKKKKKKKKKKK",like['like'],like['post_id'])
+            if like["post_id"] in like_d and like['post_id'] in dislike :
+                # print("LLLLLLLLLLLL")
                 # like_d[like["post_id"]] = 0
                 like_d[like["post_id"]] += 1  
+                
                 
             else:
                 like_d[like["post_id"]] = 1
         else:
             
             if like["post_id"] in dislike:
-                print()
+                # print()
                 # dislike[like["post_id"]] = 0
                 dislike[like["post_id"]] += 1  
                 
@@ -59,7 +60,7 @@ def posts(request):
                 dislike[like["post_id"]] = 1
                 
 
-    print(like_d,"like_d",dislike)
+    # print(like_d,"like_d",dislike)
         
     
     comment_count = (Comment.objects.values('post_id').annotate(comment_count=Count('comment')))
@@ -156,16 +157,24 @@ def logout(request):
 def like_post(request,like,id):
     print(like)
 
-    is_like= True if like == "like" else False
+    is_like = True if like == "like" else False
     print(2)
 
-    if not Like.objects.filter(user_id=request.user.id,post_id=id,like=is_like).exists():
+    if  not Like.objects.filter(user_id=request.user.id,post_id=id,like=is_like).exists():
         print(3)
     
         if like == "like":
-            Like.objects.create(user_id=request.user.id,post_id=id,like=True)
+
+            print(4)
+            if  Like.objects.filter(user_id=request.user.id,post_id=id).delete():
+                Like.objects.create(user_id=request.user.id,post_id=id,like=True) 
+
         if like == "dislike":
-            Like.objects.create(user_id=request.user.id,post_id=id,like=False)
+            print(5)
+            if  Like.objects.filter(user_id=request.user.id,post_id=id).delete():
+                print(6)
+                Like.objects.create(user_id=request.user.id,post_id=id,like=False)
+                print(7)
         return redirect('posts')
     
     return redirect('posts')
